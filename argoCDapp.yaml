@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx
+  labels:
+    portService: AwesomeService
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/samgabrail/port-argocd-integration'
+    targetRevision: HEAD
+    path: Deployment
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
