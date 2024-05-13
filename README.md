@@ -18,6 +18,7 @@ helm upgrade --install argocd port-labs/port-ocean \
 	--set integration.type="argocd"  \
 	--set integration.eventListener.type="POLLING"  \
 	--set integration.secrets.token="YOUR_ARGOCD_TOKEN"  \
+    --set scheduledResyncInterval=1  \
 	--set integration.config.serverUrl="YOUR_ARGOCD_SERVER_URL" 
 ```
 
