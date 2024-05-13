@@ -7,7 +7,7 @@ metadata:
     app: nginx
     portService: AwesomeService
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: nginx

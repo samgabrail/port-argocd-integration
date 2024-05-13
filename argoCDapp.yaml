@@ -2,6 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: nginx
+  namespace: argocd
   labels:
     portService: AwesomeService
 spec:
@@ -12,8 +13,10 @@ spec:
     path: Deployment
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: argocd
+    namespace: awesomeservice
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
