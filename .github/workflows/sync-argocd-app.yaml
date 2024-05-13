@@ -1,0 +1,55 @@
+name: Sync Argo CD Application
+on:
+  workflow_dispatch:
+    inputs:
+      application_name:
+        description: The Argo CD Application Name. e.g. app.example.com
+        required: true
+      port_payload:
+        required: true
+        description: >-
+          Port's payload, including details for who triggered the action and
+          general context (blueprint, run id, etc...)
+
+jobs:
+  sync-argocd-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log Executing Request to Sync Application
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "About to make a request to argocd server..."
+
+      - name: Sync Argo CD Application
+        uses: omegion/argocd-actions@v1
+        with:
+          address: ${{ secrets.ARGOCD_APPLICATION_HOST }}
+          token: ${{ secrets.ARGOCD_TOKEN }}
+          action: sync
+          appName: ${{ github.event.inputs.application_name }}
+
+      - name: Log If Request Fails 
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Request to sync Argo CD application failed ..."
+    
+      - name: Report Sync Success
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{fromJson(github.event.inputs.port_payload).context.runId}}
+          logMessage: "Successfully synced Argo CD Aplication ✅"

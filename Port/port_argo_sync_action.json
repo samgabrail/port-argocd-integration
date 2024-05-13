@@ -1,0 +1,73 @@
+{
+    "identifier": "argocdApplication_sync_application",
+    "title": "Sync Application",
+    "icon": "Argo",
+    "description": "Sync An Argo CD Application",
+    "trigger": {
+      "type": "self-service",
+      "operation": "DAY-2",
+      "userInputs": {
+        "properties": {
+          "application_name": {
+            "title": "Application Name",
+            "description": "Argo CD Application Name",
+            "icon": "Argo",
+            "type": "string",
+            "default": {
+              "jqQuery": ".entity.title"
+            }
+          }
+        },
+        "required": [
+          "application_name"
+        ],
+        "order": [
+          "application_name"
+        ]
+      },
+      "blueprintIdentifier": "argocdApplication"
+    },
+    "invocationMethod": {
+      "type": "GITHUB",
+      "org": "samgabrail",
+      "repo": "port-argocd-integration",
+      "workflow": "sync-argocd-app.yaml",
+      "workflowInputs": {
+        "{{if (.inputs | has(\"ref\")) then \"ref\" else null end}}": "{{.inputs.\"ref\"}}",
+        "{{if (.inputs | has(\"application_name\")) then \"application_name\" else null end}}": "{{.inputs.\"application_name\"}}",
+        "port_payload": {
+          "action": "{{ .action.identifier[(\"argocdApplication_\" | length):] }}",
+          "resourceType": "run",
+          "status": "TRIGGERED",
+          "trigger": "{{ .trigger | {by, origin, at} }}",
+          "context": {
+            "entity": "{{.entity.identifier}}",
+            "blueprint": "{{.action.blueprint}}",
+            "runId": "{{.run.id}}"
+          },
+          "payload": {
+            "entity": "{{ (if .entity == {} then null else .entity end) }}",
+            "action": {
+              "invocationMethod": {
+                "type": "GITHUB",
+                "org": "samgabrail",
+                "repo": "port-argocd-integration",
+                "workflow": "sync-argocd-app.yaml",
+                "omitUserInputs": false,
+                "omitPayload": false,
+                "reportWorkflowStatus": true
+              },
+              "trigger": "{{.trigger.operation}}"
+            },
+            "properties": {
+              "{{if (.inputs | has(\"application_name\")) then \"application_name\" else null end}}": "{{.inputs.\"application_name\"}}"
+            },
+            "censoredProperties": "{{.action.encryptedProperties}}"
+          }
+        }
+      },
+      "reportWorkflowStatus": true
+    },
+    "requiredApproval": false,
+    "publish": true
+  }
