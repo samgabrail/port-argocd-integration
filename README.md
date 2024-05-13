@@ -1,6 +1,9 @@
 # Overview
 Integrate Port with ArgoCD
 
+## Guides Used
+- https://docs.getport.io/guides-and-tutorials/visualize-service-argocd-runtime/?deploy=helm
+
 ## Install the Integration
 The following script will install an Ocean integration in your K8s cluster using helm
 ```bash
